@@ -24,7 +24,7 @@ Here, I've created a spring boot application which uploads the received CV to an
 
 It will create a document in site/CVs folder.
 
-Note that, the problem of handling the workflow has not been solved yet. Please refer **Then?** section below.
+Note that, this only demostrate how to create a document. The problem of handling the workflow has not dealt here. Please refer **Then?** section below.
 
 
 ### References
@@ -45,10 +45,13 @@ Please configure config.properties file accordingly:
 
 The application will be running on port 8888. If it's already occupied, please change **server.port** property in application.properties.
 
+The uploaded document will be uploaded to **CVs** folder under the site.
+
 ### How to Run
 
 1. Make sure alfresco is running.
-2. Make sure config.properties and application.propoerties are properly configured
+2. Create a site in alfresco (if the site name is different from **mars-hr**, change **cv-site-name** property accordingly).
+2. Make sure **config.properties** and **application.propoerties** are properly configured.
 3. Execute following commands (assuming maven has been installed):
 	* mvn package 
 	* java -jar target/marshr-0.1.jar
@@ -64,12 +67,12 @@ A.Make sure port is not already occupied. If it is, change **server.port** prope
 
 ## Then?
 
-A rule can be added to the site/CVs folder to start a simple workflow to Approve and Reject the file.
+Once you logged into Alfresco Share as admin, a rule can be added to the site/CVs folder to start a simple workflow to Approve and Reject the file.
 
 Based on outcome, the file can be moved to the revelant folder.
 
 A better solution would be to create a custom workflow and deploy the process definition file to alfresco.
 
-After that, a rule can be added to the site/CVs folder to execute a script that runs the workflow whenever a document is added.
+After that, a rule can be added to the **site/CVs** folder to execute a script that runs the workflow whenever a document is added.
 
 I'll update the project, once I learn how to create and deploy a custom workflow to alfresco.
