@@ -12,7 +12,7 @@ After they receive a CV, a HR person first checks its content and screens out un
 
 The remaining CVs are checked by a technical person like an archtect.
 
-If the techy okay'd the CV, a HR person will calls the job candidate for an phone interview.
+If the technical person approved the CV, a HR person will call the job candidate for an phone interview.
 
 After the phone interview he or she may decide whether to call the candidate for a 2nd interview or not.
 
