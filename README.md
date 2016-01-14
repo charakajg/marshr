@@ -4,7 +4,7 @@ Mars HR - A project to learn alfresco basics
 
 ## Case
 
-A reputed consultancy firm which recently extended its services to Mars is facing a lot of challenges out of home planets.
+A reputed consultancy firm which recently extended its services to Mars is facing some challenges out of its home planet.
 
 One of its major challenge is how to deal with all the CVs they receive from Earth.
 
@@ -60,7 +60,14 @@ If this need to be run as a WAR file, refer this:
 
 http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#build-tool-plugins-maven-packaging
 
-## Issues
+### Uploading a CV
+
+1. Open http://localhost:8888/ (or relevant port)
+2. Select your PDF.
+3. Click **Upload CV**
+4. If succeed, a PDF must be created in the alfresco repository (under site_name/CVs folder) 
+
+### Issues
 
 Q.**Can't run the application?**
 A.Make sure port is not already occupied. If it is, change **server.port** property in application.properties as stated above.
