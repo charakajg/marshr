@@ -16,16 +16,18 @@ If the techy okay'd the CV, a HR person will calls the job candidate for an phon
 
 After the phone interview he or she may decide whether to call the candidate for a 2nd interview or not.
 
-## Solution
+## Solution (Partial)
 
 The problem of getting the CV can be handled by allowing job candidates to upload their CV through a website.
 
-Here, I've created a spring boot application which uploads the received CV to alfresco repository.
+Here, I've created a spring boot application which uploads the received CV to an alfresco repository.
 
 It will create a document in site/CVs folder.
 
+Note that, the problem of handling the workflow has not been solved yet. Please refer **Then?** section below.
 
-### References:
+
+### References
 
 https://github.com/spring-guides/gs-uploading-files.git
 
@@ -33,15 +35,15 @@ https://github.com/jpotts/alfresco-api-java-examples.git
 
 Please configure config.properties file accordingly:
 
-cv-site-name - Site name
+**cv-site-name** - Site name
 
-host - Alfresco host path
+**host** - Alfresco host path
 
-username - Username for the alfresco user through whose account the document will be created
+**username** - Username for the alfresco user through whose account the document will be created
 
-password - Password
+**password** - Password
 
-The application will be running on port 8888. If it's already occupied, please change server.port property in application.properties.
+The application will be running on port 8888. If it's already occupied, please change **server.port** property in application.properties.
 
 ### How to Run
 
@@ -54,6 +56,11 @@ The application will be running on port 8888. If it's already occupied, please c
 If this need to be run as a WAR file, refer this:
 
 http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#build-tool-plugins-maven-packaging
+
+## Issues
+
+Q.**Can't run the application?**
+A.Make sure port is not already occupied. If it is, change **server.port** property in application.properties as stated above.
 
 ## Then?
 
