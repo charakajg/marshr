@@ -82,8 +82,21 @@ http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#build-tool-
 
 ### Issues
 
-Q.**Can't run the application?**
+Q.**Why can't I run the application on port X?**
+
 A.Make sure port is not already occupied. If it is, change **server.port** property in application.properties as stated above.
+
+Q.**Why doesn't the workflow doesn't start automatically?**
+
+A.Make sure that the folder rule is added and that it executes the **start-mars-hr-workflow.js** script.
+
+Q.**Why the script doesn't appear, when I try to add the folder rule?**
+
+A.Make sure the script is in **Repository>Data Dictionary>Scripts** folder. Otherwise it won't appear.
+
+Q.**Why nobody gets the **Technical Check** task?**
+
+A.The **Technical Check** task need to be claimed by a user who belongs to the **MarsHRTechies** group. If no user is in that group, the task won't appear on any active tasks list.
 
 ## References
 
