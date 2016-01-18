@@ -34,6 +34,10 @@ After the script, which executes the workflow, need to be uploaded to alfresco a
 
 Note that, before configuring and running the application, I'll describe how to deploy work flow and configure alfresco.
 
+### Workflow
+
+[[https://github.com/username/repository/charakajg/marshr/master/workflow.png|alt=Mars HR Workflow]]
+
 ### Configure Alfresco
 
 1. Copy all the files from **copy-to-alfresco/extensions** folder into **{ALFRESCO PATH}/tomcat/shared/classes/alfresco/extension** (The extension folder may be different, if you use a different server instead of **tomcat**.
