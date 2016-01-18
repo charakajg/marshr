@@ -28,9 +28,9 @@ HR workflow can be created as a custom workflow in alfresco.
 
 The technical people, who may check the CV, need to be added under a group, so the relevant task can be assigned only to them.
 
-I've created a workflow with Activiti Eclipse BPMN 2.0 Designer for Eclipse. It has to be deployed into alfresco.
+I've created a workflow using **Activiti Eclipse BPMN 2.0 Designer for Eclipse**. It needs to be deployed into alfresco in order to use it as I've described in below sections
 
-After the script, which executes the workflow, need to be uploaded to alfresco and a folder rule need to be set for the CVs folder, so that it will start the script.
+After that, the script, which executes the workflow, needs to be uploaded to alfresco and a folder rule needs to be added for the CVs folder, so that it will start the script when a new document is added.
 
 Note that, before configuring and running the application, I'll describe how to deploy work flow and configure alfresco.
 
