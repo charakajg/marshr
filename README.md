@@ -14,7 +14,7 @@ The remaining CVs are checked by a technical person like an archtect.
 
 If the technical person approved the CV, a HR person will call the job candidate for an phone interview.
 
-After the phone interview he or she may decide whether to call the candidate for a 2nd interview or not.
+After the phone interview he or she may decide whether to arrange an exam for the candidate or not.
 
 ## Solution
 
