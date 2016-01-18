@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://activiti.org/bpmn20">
+  <process id="prcMarsHR" name="Mars HR Process" isExecutable="true">
+
+	<extensionElements>
+	 		 <!-- When process is deleted/cancelled, status should be set to fresh -->
+             <activiti:executionListener event="end" class="org.alfresco.repo.workflow.activiti.listener.ScriptExecutionListener">
+        		<activiti:field name="script">
+                     <activiti:string>
+                        if(cancelled || deleted) {
+                        	for (var i = 0; i &lt; bpm_package.children.length; i++)
+		                    {
+		                       if (!bpm_package.children[i].hasAspect("wfmhr:status"))
+		                       {
+		                            bpm_package.children[i].properties["wfmhr:status"] = "Fresh";
+	                          		bpm_package.children[i].save();
+		                       }
+		                    }
+                        }
+                     </activiti:string>
+                  </activiti:field>
+            </activiti:executionListener>
+         </extensionElements>
+
+    <startEvent id="evtStart" name="Start"  activiti:formKey="wf:submitReviewTask"
+activiti:assignee="${initiator.properties.userName}"></startEvent>
+    <sequenceFlow id="flwAfterStart" sourceRef="evtStart" targetRef="tskInitialCheck">
+	<extensionElements>
+             <activiti:executionListener event="take" class="org.alfresco.repo.workflow.activiti.listener.ScriptExecutionListener">
+        	<activiti:field name="script">
+	             <activiti:string>
+                        if (typeof bpm_workflowDueDate != 'undefined') task.setVariableLocal('bpm_dueDate', bpm_workflowDueDate);
+                        if (typeof bpm_workflowPriority != 'undefined') task.priority = bpm_workflowPriority;
+
+                        for (var i = 0; i &lt; bpm_package.children.length; i++)
+	                    {
+	                       if (!bpm_package.children[i].hasAspect("wfmhr:status"))
+	                       {
+	                          bpm_package.children[i].addAspect("wfmhr:status");
+	                       }
+	                    }
+                     </activiti:string>
+                </activiti:field>
+            </activiti:executionListener>
+         </extensionElements>
+    </sequenceFlow>
+    <userTask id="tskInitialCheck" name="Initial Check"  activiti:formKey="wf:activitiReviewTask" activiti:assignee="${initiator.properties.userName}" >
+	<extensionElements>
+               <activiti:taskListener event="create" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
+                  <activiti:field name="script">
+                     <activiti:string>
+                        if (typeof bpm_workflowDueDate != 'undefined') task.setVariableLocal('bpm_dueDate', bpm_workflowDueDate);
+                        if (typeof bpm_workflowPriority != 'undefined') task.priority = bpm_workflowPriority;
+                        
+                         for (var i = 0; i &lt; bpm_package.children.length; i++)
+	                     {
+	                        if (bpm_package.children[0].hasAspect("wfmhr:status")) {
+		                        bpm_package.children[i].properties["wfmhr:status"] = "In initial check";
+		                        bpm_package.children[i].save();
+	                        }
+	                     }
+                     </activiti:string>
+                  </activiti:field>
+               </activiti:taskListener>
+               <activiti:taskListener event="complete" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
+                  <activiti:field name="script">
+                     <activiti:string>
+                       	execution.setVariable('wf_reviewOutcome', task.getVariable('wf_reviewOutcome'));
+                     </activiti:string>
+                  </activiti:field>
+               </activiti:taskListener>
+           </extensionElements>
+    </userTask>
+    <sequenceFlow id="flwAfterInitialCheck" sourceRef="tskInitialCheck" targetRef="gtwAfterIntialCheck"></sequenceFlow>
+    <exclusiveGateway id="gtwAfterIntialCheck" name="Exclusive Gateway"></exclusiveGateway>
+    <sequenceFlow id="flwInitialCheckPassed" sourceRef="gtwAfterIntialCheck" targetRef="tskTechnicalCheck">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${wf_reviewOutcome == 'Approve'}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flwInitialCheckFailed" sourceRef="gtwAfterIntialCheck" targetRef="tskRejectCV">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${wf_reviewOutcome != 'Approve'}]]></conditionExpression>
+    </sequenceFlow>
+    <userTask id="tskTechnicalCheck" name="Technical Check"   activiti:formKey="wf:activitiReviewTask"  activiti:candidateGroups="GROUP_MarsHRTechies">
+	<extensionElements>
+               <activiti:taskListener event="create" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
+                  <activiti:field name="script">
+                     <activiti:string>
+                        if (typeof bpm_workflowDueDate != 'undefined') task.setVariableLocal('bpm_dueDate', bpm_workflowDueDate);
+                        if (typeof bpm_workflowPriority != 'undefined') task.priority = bpm_workflowPriority;
+                        
+                         for (var i = 0; i &lt; bpm_package.children.length; i++)
+	                     {
+	                        if (bpm_package.children[0].hasAspect("wfmhr:status")) {
+		                        bpm_package.children[i].properties["wfmhr:status"] = "In technical check";
+		                        bpm_package.children[i].save();
+	                        }
+	                     }
+                     </activiti:string>
+                  </activiti:field>
+               </activiti:taskListener>
+               <activiti:taskListener event="complete" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
+                  <activiti:field name="script">
+                     <activiti:string>
+                       	execution.setVariable('wf_reviewOutcome', task.getVariable('wf_reviewOutcome'));
+                     </activiti:string>
+                  </activiti:field>
+               </activiti:taskListener>
+           </extensionElements>
+    </userTask>
+    <sequenceFlow id="flwAfterTechnicalCheck" sourceRef="tskTechnicalCheck" targetRef="gtwAfterTechnicalCheck"></sequenceFlow>
+    <exclusiveGateway id="gtwAfterTechnicalCheck" name="Exclusive Gateway"></exclusiveGateway>
+    <sequenceFlow id="flwTechnicalCheckPassed" sourceRef="gtwAfterTechnicalCheck" targetRef="tskPhoneInterview">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${wf_reviewOutcome == 'Approve'}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flwTechnicalCheckFailed" sourceRef="gtwAfterTechnicalCheck" targetRef="tskRejectCV">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${wf_reviewOutcome != 'Approve'}]]></conditionExpression>
+    </sequenceFlow>
+    <userTask id="tskPhoneInterview" name="Phone Interview" activiti:formKey="wf:activitiReviewTask" activiti:assignee="${initiator.properties.userName}">
+	<extensionElements>
+               <activiti:taskListener event="create" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
+                  <activiti:field name="script">
+                     <activiti:string>
+                        if (typeof bpm_workflowDueDate != 'undefined') task.setVariableLocal('bpm_dueDate', bpm_workflowDueDate);
+                        if (typeof bpm_workflowPriority != 'undefined') task.priority = bpm_workflowPriority;
+                        
+                         for (var i = 0; i &lt; bpm_package.children.length; i++)
+	                     {
+	                        if (bpm_package.children[0].hasAspect("wfmhr:status")) {
+		                        bpm_package.children[i].properties["wfmhr:status"] = "In phone interview";
+		                        bpm_package.children[i].save();
+	                        }
+	                     }
+                     </activiti:string>
+                  </activiti:field>
+               </activiti:taskListener>
+               <activiti:taskListener event="complete" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
+                  <activiti:field name="script">
+                     <activiti:string>
+                       	execution.setVariable('wf_reviewOutcome', task.getVariable('wf_reviewOutcome'));
+                     </activiti:string>
+                  </activiti:field>
+               </activiti:taskListener>
+           </extensionElements>
+    </userTask>
+    <sequenceFlow id="flwAfterPhoneInterview" sourceRef="tskPhoneInterview" targetRef="gtwAfterPhoneInterview"></sequenceFlow>
+    <exclusiveGateway id="gtwAfterPhoneInterview" name="Exclusive Gateway"></exclusiveGateway>
+    <sequenceFlow id="flwPhoneInterviewPassed" sourceRef="gtwAfterPhoneInterview" targetRef="tskArrangeExam">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${wf_reviewOutcome == 'Approve'}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flwPhoneInterviewFailed" sourceRef="gtwAfterPhoneInterview" targetRef="tskRejectCV">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${wf_reviewOutcome != 'Approve'}]]></conditionExpression>
+    </sequenceFlow>
+    <userTask id="tskArrangeExam" name="Arrange Exam" activiti:formKey="wf:approvedTask" activiti:assignee="${initiator.properties.userName}">
+	<extensionElements>
+               <activiti:taskListener event="create" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
+                  <activiti:field name="script">
+                     <activiti:string>
+                        if (typeof bpm_workflowDueDate != 'undefined') task.setVariableLocal('bpm_dueDate', bpm_workflowDueDate);
+                        if (typeof bpm_workflowPriority != 'undefined') task.priority = bpm_workflowPriority;
+                        
+                         for (var i = 0; i &lt; bpm_package.children.length; i++)
+	                     {
+	                        if (bpm_package.children[0].hasAspect("wfmhr:status")) {
+		                        bpm_package.children[i].properties["wfmhr:status"] = "Called for exam";
+		                        bpm_package.children[i].save();
+	                        }
+	                     }
+                     </activiti:string>
+                  </activiti:field>
+               </activiti:taskListener>
+           </extensionElements>
+    </userTask>
+    <sequenceFlow id="flwAfterArrangeExam" sourceRef="tskArrangeExam" targetRef="evtEnd"></sequenceFlow>
+    <userTask id="tskRejectCV" name="Reject CV" activiti:formKey="wf:rejectedTask" activiti:assignee="${initiator.properties.userName}">
+	<extensionElements>
+               <activiti:taskListener event="create" class="org.alfresco.repo.workflow.activiti.tasklistener.ScriptTaskListener">
+                  <activiti:field name="script">
+                     <activiti:string>
+                        if (typeof bpm_workflowDueDate != 'undefined') task.setVariableLocal('bpm_dueDate', bpm_workflowDueDate);
+                        if (typeof bpm_workflowPriority != 'undefined') task.priority = bpm_workflowPriority;
+                        
+                         for (var i = 0; i &lt; bpm_package.children.length; i++)
+	                     {
+	                        if (bpm_package.children[0].hasAspect("wfmhr:status")) {
+		                        bpm_package.children[i].properties["wfmhr:status"] = "Rejected";
+		                        bpm_package.children[i].save();
+	                        }
+	                     }
+                     </activiti:string>
+                  </activiti:field>
+               </activiti:taskListener>
+           </extensionElements>
+    </userTask>
+    <sequenceFlow id="flwAfterRejectCV" sourceRef="tskRejectCV" targetRef="evtEnd"></sequenceFlow>
+    <endEvent id="evtEnd" name="End"></endEvent>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_prcMarsHR">
+    <bpmndi:BPMNPlane bpmnElement="prcMarsHR" id="BPMNPlane_prcMarsHR">
+      <bpmndi:BPMNShape bpmnElement="evtStart" id="BPMNShape_evtStart">
+        <omgdc:Bounds height="35.0" width="35.0" x="60.0" y="80.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="tskInitialCheck" id="BPMNShape_tskInitialCheck">
+        <omgdc:Bounds height="55.0" width="105.0" x="140.0" y="70.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="gtwAfterIntialCheck" id="BPMNShape_gtwAfterIntialCheck">
+        <omgdc:Bounds height="40.0" width="40.0" x="290.0" y="78.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="tskTechnicalCheck" id="BPMNShape_tskTechnicalCheck">
+        <omgdc:Bounds height="55.0" width="105.0" x="375.0" y="71.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="gtwAfterTechnicalCheck" id="BPMNShape_gtwAfterTechnicalCheck">
+        <omgdc:Bounds height="40.0" width="40.0" x="525.0" y="79.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="tskPhoneInterview" id="BPMNShape_tskPhoneInterview">
+        <omgdc:Bounds height="55.0" width="105.0" x="590.0" y="72.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="gtwAfterPhoneInterview" id="BPMNShape_gtwAfterPhoneInterview">
+        <omgdc:Bounds height="40.0" width="40.0" x="740.0" y="80.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="tskArrangeExam" id="BPMNShape_tskArrangeExam">
+        <omgdc:Bounds height="55.0" width="105.0" x="890.0" y="73.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="evtEnd" id="BPMNShape_evtEnd">
+        <omgdc:Bounds height="35.0" width="35.0" x="925.0" y="220.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="tskRejectCV" id="BPMNShape_tskRejectCV">
+        <omgdc:Bounds height="55.0" width="105.0" x="795.0" y="210.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="flwAfterStart" id="BPMNEdge_flwAfterStart">
+        <omgdi:waypoint x="95.0" y="97.0"></omgdi:waypoint>
+        <omgdi:waypoint x="140.0" y="97.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flwAfterInitialCheck" id="BPMNEdge_flwAfterInitialCheck">
+        <omgdi:waypoint x="245.0" y="97.0"></omgdi:waypoint>
+        <omgdi:waypoint x="290.0" y="98.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flwInitialCheckPassed" id="BPMNEdge_flwInitialCheckPassed">
+        <omgdi:waypoint x="330.0" y="98.0"></omgdi:waypoint>
+        <omgdi:waypoint x="375.0" y="98.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flwAfterTechnicalCheck" id="BPMNEdge_flwAfterTechnicalCheck">
+        <omgdi:waypoint x="480.0" y="98.0"></omgdi:waypoint>
+        <omgdi:waypoint x="525.0" y="99.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flwTechnicalCheckPassed" id="BPMNEdge_flwTechnicalCheckPassed">
+        <omgdi:waypoint x="565.0" y="99.0"></omgdi:waypoint>
+        <omgdi:waypoint x="590.0" y="99.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flwAfterPhoneInterview" id="BPMNEdge_flwAfterPhoneInterview">
+        <omgdi:waypoint x="695.0" y="99.0"></omgdi:waypoint>
+        <omgdi:waypoint x="740.0" y="100.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flwPhoneInterviewPassed" id="BPMNEdge_flwPhoneInterviewPassed">
+        <omgdi:waypoint x="780.0" y="100.0"></omgdi:waypoint>
+        <omgdi:waypoint x="890.0" y="100.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flwInitialCheckFailed" id="BPMNEdge_flwInitialCheckFailed">
+        <omgdi:waypoint x="310.0" y="118.0"></omgdi:waypoint>
+        <omgdi:waypoint x="309.0" y="237.0"></omgdi:waypoint>
+        <omgdi:waypoint x="795.0" y="237.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flwAfterArrangeExam" id="BPMNEdge_flwAfterArrangeExam">
+        <omgdi:waypoint x="942.0" y="128.0"></omgdi:waypoint>
+        <omgdi:waypoint x="942.0" y="220.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flwPhoneInterviewFailed" id="BPMNEdge_flwPhoneInterviewFailed">
+        <omgdi:waypoint x="760.0" y="120.0"></omgdi:waypoint>
+        <omgdi:waypoint x="760.0" y="237.0"></omgdi:waypoint>
+        <omgdi:waypoint x="795.0" y="237.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flwTechnicalCheckFailed" id="BPMNEdge_flwTechnicalCheckFailed">
+        <omgdi:waypoint x="545.0" y="119.0"></omgdi:waypoint>
+        <omgdi:waypoint x="545.0" y="237.0"></omgdi:waypoint>
+        <omgdi:waypoint x="795.0" y="237.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flwAfterRejectCV" id="BPMNEdge_flwAfterRejectCV">
+        <omgdi:waypoint x="900.0" y="237.0"></omgdi:waypoint>
+        <omgdi:waypoint x="925.0" y="237.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>

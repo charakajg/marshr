@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<model name="wfmhr:workflowMarsHRModel" xmlns="http://www.alfresco.org/model/dictionary/1.0">
+    <description>Mars HR Model</description>
+    <author></author>
+    <version>1.0</version>
+
+    <imports>
+        <!-- Import Alfresco Dictionary Definitions -->
+        <import uri="http://www.alfresco.org/model/dictionary/1.0" prefix="d" />
+        <!-- Import Alfresco Content Domain Model Definitions -->
+        <import uri="http://www.alfresco.org/model/content/1.0" prefix="cm" />
+    </imports>
+
+    <namespaces>
+        <namespace uri="wfmhr.model" prefix="wfmhr" />
+    </namespaces>
+
+    <constraints>
+        <constraint name="wfmhr:status" type="LIST">
+            <parameter name="allowedValues">
+                <list>
+                    <value>Fresh</value>
+                    <value>In initial check</value>
+                    <value>In technical check</value>
+                    <value>In phone interview</value>
+                    <value>Called for exam</value>
+                    <value>Rejected</value>
+                </list>
+            </parameter>
+        </constraint>
+    </constraints>
+
+    <aspects>
+        <aspect name="wfmhr:status">
+            <title>Status</title>
+            <properties>
+                <property name="wfmhr:status">
+                    <title>Status</title>
+                    <type>d:text</type>
+                    <default>Fresh</default>
+                    <constraints>
+                        <constraint ref="wfmhr:status" />
+                    </constraints>
+                </property>
+            </properties>
+        </aspect>
+
+    </aspects>
+
+</model>

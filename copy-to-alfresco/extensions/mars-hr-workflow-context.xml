@@ -1,0 +1,48 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE beans PUBLIC '-//SPRING//DTD BEAN//EN' 'http://www.springframework.org/dtd/spring-beans.dtd'>
+
+<beans>
+
+   <bean id="marshr.groupsBootstrap" class="org.alfresco.repo.module.ImporterModuleComponent" parent="module.baseComponent">
+       <property name="moduleId" value="marshrModule" />
+       <property name="name" value="marshrImport" />
+       <property name="description" value="Importing HR Techies" />
+       <property name="sinceVersion" value="1.0" />        
+       <property name="appliesFromVersion" value="1.0" />  
+       <property name="importer" ref="userBootstrap"/>
+       <property name="bootstrapViews">
+           <list>
+               <props>
+                   <prop key="path">/${alfresco_user_store.system_container.childname}/sys:authorities</prop>
+                   <prop key="location">alfresco/extension/mars-hr-groups.xml</prop>
+               </props>
+           </list>
+       </property>
+   </bean>
+
+    <bean id="marshr.workflowBootstrap" parent="workflowDeployer">
+		<property name="workflowDefinitions">
+			<list>
+				<!-- Activiti version of lifecycle process -->
+				<props>
+					<prop key="engineId">activiti</prop>
+					<prop key="location">alfresco/extension/mars-hr-process.bpmn20.xml</prop>
+					<prop key="mimetype">text/xml</prop>
+					<prop key="redeploy">true</prop>
+				</props>
+			</list>
+		</property>
+		<property name="models">
+			<list>
+		                <value>alfresco/extension/mars-hr-model.xml</value>
+			</list>
+		</property>
+
+		<property name="labels">
+			<list>
+		                <value>alfresco/extension/mars-hr-messages</value>
+			</list>
+		</property>
+	</bean>
+
+</beans>

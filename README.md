@@ -16,7 +16,7 @@ If the technical person approved the CV, a HR person will call the job candidate
 
 After the phone interview he or she may decide whether to call the candidate for a 2nd interview or not.
 
-## Solution (Partial)
+## Solution
 
 The problem of getting the CV can be handled by allowing job candidates to upload their CV through a website.
 
@@ -24,14 +24,27 @@ Here, I've created a spring boot application which uploads the received CV to an
 
 It will create a document in site/CVs folder.
 
-Note that, this only demostrate how to create a document. The problem of handling the workflow has not dealt here. Please refer **Then?** section below.
+HR workflow can be created as a custom workflow in alfresco.
 
+The technical people, who may check the CV, need to be added under a group, so the relevant task can be assigned only to them.
 
-### References
+I've created a workflow with Activiti Eclipse BPMN 2.0 Designer for Eclipse. It has to be deployed into alfresco.
 
-https://github.com/spring-guides/gs-uploading-files.git
+After the script, which executes the workflow, need to be uploaded to alfresco and a folder rule need to be set for the CVs folder, so that it will start the script.
 
-https://github.com/jpotts/alfresco-api-java-examples.git
+Note that, before configuring and running the application, I'll describe how to deploy work flow and configure alfresco.
+
+### Configure Alfresco
+
+1. Copy all the files from **copy-to-alfresco/extensions** folder into **{ALFRESCO PATH}/tomcat/shared/classes/alfresco/extension** (The extension folder may be different, if you use a different server instead of **tomcat**.
+2. Start/Restart alfresco. This will deploy workflow into alfresco as bootstrap data. (Please refer references for more information)
+3. Create a site in alfresco (If the site name is different from **mars-hr**, change **cv-site-name** property as described in next section).
+4. Create a group in alfresco called **MarsHRTechies**. The technical people, who will be carry out technical check, should be added under this group. (Make sure you add at least one user under this)
+5. Upload **start-mars-hr-workflow.js** file from **copy-to-alfresco/scripts** folder into **Repository>Data Dictionary>Scripts** (This is the script which executes the hr workflow)
+6. Create a folder named **CVs** under the site you created.
+7. Add a folder rule to the **site/CVs** folder so that it'll excute the **start-mars-hr-workflow.js** when a new document is added.
+
+### Configure CV Upload Application
 
 Please configure config.properties file accordingly:
 
@@ -50,9 +63,9 @@ The uploaded document will be uploaded to **CVs** folder under the site.
 ### How to Run
 
 1. Make sure alfresco is running.
-2. Create a site in alfresco (if the site name is different from **mars-hr**, change **cv-site-name** property accordingly).
-2. Make sure **config.properties** and **application.propoerties** are properly configured.
-3. Execute following commands (assuming maven has been installed):
+2. Make sure it's properly configured. (site, workflow, group, script and folder rule)
+3. Make sure **config.properties** and **application.propoerties** are properly configured.
+4. Execute following commands (assuming maven has been installed):
 	* mvn package 
 	* java -jar target/marshr-0.1.jar
 
@@ -72,14 +85,16 @@ http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#build-tool-
 Q.**Can't run the application?**
 A.Make sure port is not already occupied. If it is, change **server.port** property in application.properties as stated above.
 
-## Then?
+## References
 
-Once you logged into Alfresco Share as admin, a rule can be added to the site/CVs folder to start a simple workflow to Approve and Reject the file.
+This was tested with **alfresco-5.0.b (community edition)** running on **ubuntu 14 LTS**. The application server and datbase were default postgresql and tomcat versions that comes with alfresco. If something need changes for any other reason, please refer articles and repositories below which have been used for the development of this solution.
 
-Based on outcome, the file can be moved to the revelant folder.
+http://ecmarchitect.com/alfresco-developer-series-tutorials/workflow/tutorial/tutorial.html
 
-A better solution would be to create a custom workflow and deploy the process definition file to alfresco.
+https://wiki.alfresco.com/wiki/WorkflowSample_Lifecycle
 
-After that, a rule can be added to the **site/CVs** folder to execute a script that runs the workflow whenever a document is added.
+https://github.com/Alfresco/community-edition/tree/master/projects/repository/config/alfresco/extension
 
-I'll update the project, once I learn how to create and deploy a custom workflow to alfresco.
+https://github.com/spring-guides/gs-uploading-files.git
+
+https://github.com/jpotts/alfresco-api-java-examples.git
