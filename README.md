@@ -36,7 +36,7 @@ Note that, before configuring and running the application, I'll describe how to 
 
 ### Workflow
 
-![Mars HR Workflow](https://github.com/username/repository/charakajg/marshr/master/workflow.png)
+![Mars HR Workflow](https://raw.github.com/charakajg/marshr/master/workflow.png)
 
 ### Configure Alfresco
 
